@@ -22,9 +22,9 @@ RUN sh -c "sed -i -e '/<value name=\"MMSCurrentMachineID\" type=\"TString\">/,/<
     sh -c "ps aux | grep [m]ms | awk '{print \$2}' | xargs -I {} -- kill -9 {}"
 
 
-COPY rsrc/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY rsrc_agent/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY rsrc/register_mms.sh /register_mms.sh
+COPY rsrc_agent/register_mms.sh /register_mms.sh
 
 RUN chmod 777 /register_mms.sh
 
