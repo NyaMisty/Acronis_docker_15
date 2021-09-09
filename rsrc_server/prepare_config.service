@@ -1,0 +1,8 @@
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/prepare_config.sh
+RemainAfterExit=yes
+Before=basic.target
+
+[Install]
+RequiredBy=basic.target

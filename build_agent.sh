@@ -3,6 +3,6 @@
 VER=$(./AcronisBackupSetup -v 2>/dev/null)
 NAME="nyamisty/acronis_backup_agent"
 echo Going to build agent $VER
-docker build -t $NAME:$VER .
+docker build -f Dockerfile.agent -t $NAME:$VER .
 docker tag $NAME:$VER $NAME
 docker push $NAME

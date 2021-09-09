@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+FROM centos/systemd AS build
+
+COPY AcronisBackupSetup /tmp/acronis_setup
+
+RUN chmod 777 /tmp/acronis_setup
+
+RUN /tmp/acronis_setup -a -i AcronisCentralizedManagementServer,BackupAndRecoveryBootableComponents,MonitoringServer --skip-registration \
+    && mkdir /def_config && cd /def_config \
+    && mkdir home var_lib_Acronis var_lib_mondb etc_Acronis \
+    && (shopt -s nullglob dotglob; mv /home/* home; mv /var/lib/Acronis/* var_lib_Acronis; mv /var/lib/mondb/* var_lib_mondb; mv /etc/Acronis/* etc_Acronis) \
+    && cp -a /etc/passwd /etc/shadow /def_config
+
+RUN rm /tmp/acronis_setup
+
+FROM centos/systemd
+
+COPY --from=build / /
+
+SHELL ["/bin/bash", "-c"]
+
+RUN ln -s /etc/machine-id /var/lib/dbus/machine-id
+
+RUN echo root:123456 | chpasswd
+
+EXPOSE 9877
+
+VOLUME ["/home", "/var/lib/Acronis", "/var/lib/mondb", "/etc/Acronis", "/etc/pass_conf"]
+
+ADD rsrc_server/prepare_config.service /etc/systemd/system/prepare_config.service
+ADD rsrc_server/prepare_config.sh /usr/local/libexec/prepare_config.sh
+ADD rsrc_server/liblibcrypto10_hook.so /usr/lib/Acronis/BackupAndRecovery/Common/liblibcrypto10_hook.so
+RUN cd /usr/lib/Acronis/BackupAndRecovery/Common && mv liblibcrypto10.so liblibcrypto10_good.so && mv liblibcrypto10_hook.so liblibcrypto10.so
+
+RUN chmod 0600 /etc/systemd/system/prepare_config.service && chmod 0755 /usr/local/libexec/prepare_config.sh \
+     && systemctl enable prepare_config acronis_ams acronis_asm acronis_zmqgw
+
+ENTRYPOINT []
+
+CMD ["/usr/sbin/init"]
