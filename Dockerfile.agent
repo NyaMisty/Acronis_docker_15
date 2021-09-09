@@ -1,14 +1,21 @@
-FROM ubuntu:18.04
+# syntax=docker/dockerfile:1
+FROM ubuntu:18.04 AS build
 
 RUN apt update && apt install -y rpm supervisor cron &&  rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /var/log/supervisor
 
 COPY AcronisBackupSetup /tmp/acronis_setup
 
 RUN chmod 777 /tmp/acronis_setup
 
 RUN /tmp/acronis_setup -a -i BackupAndRecoveryAgent --skip-registration
+
+RUN rm /tmp/acronis_setup
+
+FROM ubuntu:18.04
+
+COPY --from=build / /
+
+RUN mkdir -p /var/log/supervisor
 
 RUN sh -c "sed -i -e '/<value name=\"MMSCurrentMachineID\" type=\"TString\">/,/<\/value>/ s|\"[0-9A-Z-]\{1,\}\"|\"\"|g' /etc/Acronis/BackupAndRecovery.config" && \
     sh -c "sed -i -e '/<value name=\"InstanceID\" type=\"TString\">/,/<\/value>/ s|\"[0-9A-Z-]\{1,\}\"|\"\"|g' /etc/Acronis/BackupAndRecovery.config" && \
