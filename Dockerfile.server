@@ -1,40 +1,70 @@
-# syntax=docker/dockerfile:1
-FROM centos/systemd AS build
+# syntax=docker/dockerfile:1.2
 
-COPY AcronisBackupSetup /tmp/acronis_setup
+# This one does not work
+#FROM centos/systemd
 
-RUN chmod 777 /tmp/acronis_setup
-
-RUN /tmp/acronis_setup -a -i AcronisCentralizedManagementServer,BackupAndRecoveryBootableComponents,MonitoringServer --skip-registration \
-    && mkdir /def_config && cd /def_config \
-    && mkdir home var_lib_Acronis var_lib_mondb etc_Acronis \
-    && (shopt -s nullglob dotglob; mv /home/* home; mv /var/lib/Acronis/* var_lib_Acronis; mv /var/lib/mondb/* var_lib_mondb; mv /etc/Acronis/* etc_Acronis) \
-    && cp -a /etc/passwd /etc/shadow /def_config
-
-RUN rm /tmp/acronis_setup
-
-FROM centos/systemd
-
-COPY --from=build / /
+# This one seems better
+FROM jrei/systemd-ubuntu:18.04
+RUN apt-get update \
+    && apt-get install rpm openjdk-8-jre-headless curl vim rsync -y \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*;
 
 SHELL ["/bin/bash", "-c"]
 
-RUN ln -s /etc/machine-id /var/lib/dbus/machine-id
+#COPY AcronisBackupSetup /tmp/acronis_setup
 
-RUN echo root:123456 | chpasswd
+RUN rm -f /var/lib/dbus/machine-id /etc/machine-id && systemd-machine-id-setup && cat /etc/machine-id
+#RUN ln -s /etc/machine-id /var/lib/dbus/machine-id
 
-EXPOSE 9877
+RUN --mount=source=AcronisBackupSetup,target=/tmp/acronis_setup \
+    /tmp/acronis_setup -a -i AcronisCentralizedManagementServer,MonitoringServer --skip-registration --skip-svc-start --ams=127.0.0.1 \
+    && set -x \
+    && mkdir -p /var/lib/Acronis/ServiceManager /var/lib/Acronis/ZmqGw \
+    && (echo "Moving persistent contents: "; ls -al /var/lib/Acronis; ls -al /etc/Acronis; ls -al /opt/acronis/management_agent/var) \
+    && mkdir /def_config && cd /def_config \
+    && (shopt -s nullglob dotglob; \
+            mkdir home; \
+            mkdir var_lib_alsdb; \
+            mkdir var_lib_Acronis; mv /var/lib/Acronis/* var_lib_Acronis/; \
+            mkdir etc_Acronis; mv /etc/Acronis/* etc_Acronis; \
+            mkdir opt_acronis_mms_var; mv /opt/acronis/management_agent/var/* opt_acronis_mms_var; \
+        )
 
-VOLUME ["/home", "/var/lib/Acronis", "/var/lib/mondb", "/etc/Acronis", "/etc/pass_conf"]
+#            mv /var/lib/Acronis var_lib_Acronis; mkdir /var/lib/Acronis; \
+#            mv /etc/Acronis etc_Acronis; mkdir /etc/Acronis; \
+#            mv /opt/acronis/management_agent/var opt_acronis_mms_var; mkdir /opt/acronis/management_agent/var; \
+
+
+#RUN rm /tmp/acronis_setup
+
+# allow password login for other users
+RUN cp -a /etc/pam.d/acronisagent /etc/pam.d/acronisagent_bak && echo '' > /etc/pam.d/acronisagent
+
+EXPOSE 9877 7780
+
+VOLUME ["/home", "/var/lib/Acronis", "/var/lib/alsdb", "/etc/Acronis", "/opt/acronis/management_agent/var", "/var/etc_pass"]
 
 ADD rsrc_server/prepare_config.service /etc/systemd/system/prepare_config.service
 ADD rsrc_server/prepare_config.sh /usr/local/libexec/prepare_config.sh
-ADD rsrc_server/liblibcrypto10_hook.so /usr/lib/Acronis/BackupAndRecovery/Common/liblibcrypto10_hook.so
-RUN cd /usr/lib/Acronis/BackupAndRecovery/Common && mv liblibcrypto10.so liblibcrypto10_good.so && mv liblibcrypto10_hook.so liblibcrypto10.so
 
-RUN chmod 0600 /etc/systemd/system/prepare_config.service && chmod 0755 /usr/local/libexec/prepare_config.sh \
-     && systemctl enable prepare_config acronis_ams acronis_asm acronis_zmqgw
+ADD rsrc_server/sync_passwd.service /etc/systemd/system/sync_passwd.service
+ADD rsrc_server/sync_passwd.sh /usr/local/libexec/sync_passwd.sh
+ADD rsrc_server/osync.sh /usr/local/libexec/unison
+
+RUN cp -a /usr/lib/Acronis/AccountServer/account_server.json /usr/lib/Acronis/AccountServer/account_server_bak.json
+ADD rsrc_server/account_server.json /usr/lib/Acronis/AccountServer/account_server.json
+
+RUN chmod 0644 /etc/systemd/system/prepare_config.service \
+    && chmod 0644 /etc/systemd/system/sync_passwd.service \
+    && chmod 0755 /usr/local/libexec/* \
+     && systemctl enable sync_passwd prepare_config acronis_ams acronis_asm acronis_zmqgw acronis_monitoring_service management_aakore
+
+RUN (echo root:123456 | chpasswd) \
+    && mkdir /var/etc_pass && cp -a /etc/passwd /etc/shadow /var/etc_pass \
+    && touch -a -m -t 200001010000 /etc/passwd /etc/shadow
+
 
 ENTRYPOINT []
 
-CMD ["/usr/sbin/init"]
+#CMD ["/usr/sbin/init"]
+CMD ["init"]

@@ -1,14 +1,13 @@
 [Unit]
-Description=Prepare the config located in volumes
+Description=Sync /etc/passwd to config volume
 DefaultDependencies=no
 Requires=local-fs.target
 After=local-fs.target
 Before=sysinit.target
 
 [Service]
-Type=oneshot
-ExecStart=/usr/local/libexec/prepare_config.sh
-RemainAfterExit=yes
+Type=simple
+ExecStart=/usr/local/libexec/sync_passwd.sh
 
 [Install]
 RequiredBy=basic.target

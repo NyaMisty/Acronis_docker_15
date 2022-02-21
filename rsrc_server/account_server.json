@@ -1,0 +1,305 @@
+{
+  "session": {
+    "secret": "",
+    "soft_ttl": 3600000000000,
+    "hard_ttl": 86400000000000
+  },
+  "api_gateway": "acronis_apigw_discovery",
+  "storage": {
+    "type": "sqlite3",
+    "config": {
+      "file": "account_server.db",
+      "params": "_txlock=concurrent",
+      "max_open_conns": 2000
+    }
+  },
+  "connectors": [
+    {
+      "type": "sspi",
+      "name": "1 Windows Integrated Logon",
+      "id": "sspi",
+      "config": {}
+    },
+    {
+      "type": "local",
+      "name": "2 Form-based",
+      "id": "local",
+      "config": {
+        "ldap": {
+          "host": "",
+          "domain": "",
+          "search_forest_domains": false,
+          "bindDN": "",
+          "bindPW": ""
+        }
+      }
+    }
+  ],
+  "web": {
+    "http": "127.0.0.1:30678",
+    "http_timeouts": {
+      "read": "5m0s",
+      "read_header": "1m0s",
+      "write": "10m0s",
+      "idle": "5m0s"
+    }
+  },
+  "expiry": {
+    "subscriptions": "1h"
+  },
+  "log": {
+    "level": "debug",
+    "file": "account_server.log",
+    "max_size_mb": 10,
+    "max_age_days": -1,
+    "max_backups": 10
+  },
+  "licensing": {
+    "product_mode": "standard",
+    "bundles_config_name": "Standard",
+    "key_parse_mode": "Standard",
+    "need_account_for_trial": false,
+    "allow_licenses_cloud_sync": false,
+    "license_keys_have_maintenance_period": true,
+    "license_history_page_limit": 1000,
+    "license_history_save_to_db": true,
+    "license_policies_page_limit": 1000
+  },
+  "license_manager": {
+    "url": "http://127.0.0.1:31025",
+    "http_client_timeout": "30s",
+    "required": true
+  },
+  "agent_manager": {
+    "url": "",
+    "agents_reg_public_name": "",
+    "http_client_timeout": "30s"
+  },
+  "tenants_resolver_address": "127.0.0.1:30776",
+  "report_schedule": {},
+  "frontend": {
+    "dir": "./web",
+    "logo_url": "logo.svg"
+  },
+  "mode": "onprem",
+  "ca": {
+    "cert_file": "ca.cert",
+    "key_file": "ca.key",
+    "encrypt_key_file": false,
+    "ca_gen": {
+      "rsa_key_size": 2048,
+      "pkix": "/C=CH/ST=Schaffhausen/L=Switzerland/O=Acronis/OU=BackupAccountServer/CN=BackupAccountServer"
+    }
+  },
+  "ls_url": "http://127.0.0.1:30443",
+  "account_url": "https://account.acronis__.com/v2",
+  "global_registry_url": "https://cloud.acronis__.com",
+  "ams_url": "http://127.0.0.1:9892",
+  "alert_manager_url": "http://127.0.0.1:30630",
+  "wcs_url": "http://127.0.0.1:30679",
+  "vault_manager_url": "http://127.0.0.1:30691",
+  "ipn_url": "https://ipn.acronis__.com/api/ipn/v1",
+  "legacy_activation_server_wsdl_url": "https://activation.acronis__.com/cpas.wsdl",
+  "legacy_activation_frequency": "1h",
+  "backup_manager": {
+    "url": "",
+    "skip_tls_check": false,
+    "retry_timeout": "",
+    "retry_delay": ""
+  },
+  "audit_enabled": true,
+  "activation_frequency": "24h",
+  "strict_grace_period": "720h",
+  "activation_server": {},
+  "licenser_watcher": {
+    "check_period": "5s",
+    "no_sync_period": "720h0m0s",
+    "after_upgrade_no_restrict_period": "720h0m0s",
+    "restrict_licensing_for_deactivated": true
+  },
+  "roles": "roles.yml",
+  "kv_tenant_maximum": 20,
+  "kv_user_maximum": 20,
+  "checksum": {
+    "alg": "sha256",
+    "sum": "ChwznVgoP6UHVp2utyTYnp6F84qSp0OfazAxIRJx3PI="
+  },
+  "on_prem_operations_override_validation_key": "LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUFzNkg2d3VwajhoNUZucUVYbW81SQpudlhxbVVmN0VxbXRtQ0dxMHkrUVh3UGV5Q2oyQTR4QUNDOCtHR2o1RWIwVXFWWUcrTGdmSVoyakFjQXcvZUxwClhyTHBENDlQemVBTkxvR0lkZTlFbkdjNG51SHd5VWlUdnBmZHBYc0N5dTFFeG84WkNZSE1SeEUxOUlyYTUxS0EKNHNzQ1BiM2FHeGxEN3JTTmNKclJsM2JLZmsxY3kzRXB6VU5FVk1XRkFJbHRHbml1cThBSlNCZC9YUVB0em5qWgptMUl4T2k4VEp3Y2YxV0x6U3hjaGNqNlFLWUpVeWhyS0hMdVp0RkVNQWFSSVk0ZGt0cFE3a1dMZi9Sa3p6RFBUCmNQQUZrMzhxQzJ5VlIxTHhqL01SaXNqRVJOYWMycFdBZTlucjJzN25pMk1HN1oxRXhMMkdnakRlVDlqclV2bGYKQlFJREFRQUIKLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==",
+  "tracing": {
+    "enabled": false,
+    "jaeger": {
+      "reporter": {
+        "agent_addr": ""
+      },
+      "sampler": {
+        "type": "",
+        "param": 0
+      }
+    }
+  },
+  "demo_mode_duration": "876000h",
+  "demo_mode_check_period": "10m",
+  "bad_passwords": {
+    "database": {
+      "path": "",
+      "validate_on_open": false
+    }
+  },
+  "signing": {
+    "objects": [
+      {
+        "version": "v2",
+        "name": "resources",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "tenant_usage",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "tenant_quotas",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "infra_usage",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "infra_quotas",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "actions",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "offering_item_count",
+        "id": "id",
+        "block_size": 200
+      },
+      {
+        "version": "v2",
+        "name": "acquired_resources",
+        "id": "id",
+        "block_size": 200
+      }
+    ]
+  },
+  "aakore": {
+    "socket_path": "",
+    "routes": [
+      "/api/ls"
+    ],
+    "healthcheck": {
+      "timeout": "5s",
+      "interval": "20s",
+      "max_failures": 3
+    }
+  },
+  "cloud_registration": {
+    "sync_interval": "24h0m0s",
+    "reg_chan_capacity": 100,
+    "entry_get_limit": 100
+  },
+  "s3_storage": {
+    "amount_of_buckets": 0,
+    "access_key_id": "",
+    "access_secret": "",
+    "storage_endpoint": "",
+    "disable_ssl": false,
+    "default_region": "",
+    "url_lifetime": "0s"
+  },
+  "auth_journal": {
+    "check_interval": 900000000000,
+    "lockout_interval": 300000000000,
+    "max_attempts": 10,
+    "max_signed_attempts": 10
+  },
+  "default_allowed_ip_addresses": [
+    "185.151.160.0/24",
+    "185.151.161.0/24",
+    "45.254.38.0/24",
+    "209.58.160.0/20"
+  ],
+  "fallback_proxy": {},
+  "vault_settings": {
+    "vault_address": "",
+    "role_id": "",
+    "secret_id": "",
+    "ca_cert_path": "",
+    "token_renew_interval": "30m0s"
+  },
+  "idp": {
+    "bas_token_authority": {
+      "issuer": "backup_account_server",
+      "id_tokens_valid_for": "24h0m0s",
+      "access_tokens_valid_for": "720h0m0s",
+      "refresh_tokens_valid_for": "720h0m0s",
+      "auth_codes_valid_for": "10m0s",
+      "expand_policies": true,
+      "keys": {
+        "length": 0,
+        "valid_for": "0s",
+        "rotation_period": "0s"
+      }
+    },
+    "pas_token_authority": {
+      "issuer": "",
+      "id_tokens_valid_for": "2h0m0s",
+      "access_tokens_valid_for": "2h0m0s",
+      "refresh_tokens_valid_for": "720h0m0s",
+      "auth_codes_valid_for": "10m0s",
+      "expand_policies": false,
+      "keys": {
+        "length": 2048,
+        "valid_for": "720h0m0s",
+        "rotation_period": "24h0m0s"
+      }
+    },
+    "pas_external_v1_tokens": {
+      "verification_timeout": "5s"
+    },
+    "device_flow": {
+      "user_code_valid_for": "1h0m0s",
+      "user_code_polling_interval": "5s"
+    },
+    "open_dynamic_registration": false,
+    "supported_response_types": [
+      "code"
+    ]
+  },
+  "db_retention_config": "",
+  "throttling_config": "",
+  "prometheus": {
+    "pushgateway_url": ""
+  },
+  "usages_propagation": {
+    "use_in_memory_own_usage_table": true
+  },
+  "totp_bruteforce": {
+    "check_interval": "15m0s",
+    "lock_duration": "5m0s",
+    "max_attempts": 5
+  },
+  "smtp": {
+    "host": "127.0.0.1",
+    "port": 25
+  },
+  "email_cipher": {
+    "key": "",
+    "key_lifetime": "672h0m0s"
+  }
+}
